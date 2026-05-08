@@ -11,8 +11,13 @@ services:
       - TZ=Asia/Jakarta
       - JVM_MEM_OPTS=${MI_JAVA_OPTS:--Xms512m -Xmx1024m}
     healthcheck:
-      test: ["CMD-SHELL", "curl -ks https://localhost:9164/healthz || curl -fs http://localhost:8290 > /dev/null 2>&1 || exit 1"]
+      # WSO2 MI Management API berjalan di port 9164 via HTTP (bukan HTTPS)
+      # Endpoint /health tersedia mulai WSO2 MI 4.x (bukan /healthz)
+      test: ["CMD-SHELL", "curl -sf http://localhost:9164/health | grep -q UP || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 8
-      start_period: 60s
+      start_period: 90s
+    labels:
+      - "com.belajarwso2.service=micro-integrator"
+      - "com.belajarwso2.version=${MI_IMAGE:-belajarwso2:1.0.0}"

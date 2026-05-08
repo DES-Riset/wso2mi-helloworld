@@ -28,7 +28,9 @@ fi
 
 # 2. Build Carbon Application & Custom Docker Image
 echo -e "\n${BLUE}📦 Mengompilasi proyek & membangun Custom Docker Image...${NC}"
-mvn clean package -Pdocker -Dmaven.test.skip=true
+mkdir -p deployment/libs
+chmod +x mvnw
+./mvnw clean package -Pdocker -Dmaven.test.skip=true
 echo -e "✅ Custom Docker Image berhasil dibangun."
 
 # 3. Ask for Run
