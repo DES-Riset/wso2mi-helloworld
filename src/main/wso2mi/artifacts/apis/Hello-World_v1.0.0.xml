@@ -3,7 +3,12 @@
     xmlns="http://ws.apache.org/ns/synapse">
     <resource methods="GET" uri-template="/">
         <inSequence>
-            <respond description="Hello" />
+            <payloadFactory media-type="json" template-type="default">
+                <format>{
+                    "message": "Hello World"
+                    }</format>
+            </payloadFactory>
+            <respond description="Hello"/>
         </inSequence>
         <faultSequence>
         </faultSequence>
