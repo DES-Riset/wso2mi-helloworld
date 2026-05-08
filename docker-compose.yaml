@@ -5,8 +5,8 @@ services:
     container_name: belajar-micro-integrator
     restart: unless-stopped
     ports:
-      - "${MI_PORT:-8290}:8290"
-      - "8253:8253"
+      - "${MI_PORT:-8291}:8290"
+      - "${MI_HTTPS_PORT:-8254}:8253"
     environment:
       - TZ=Asia/Jakarta
       - JVM_MEM_OPTS=${MI_JAVA_OPTS:--Xms512m -Xmx1024m}
