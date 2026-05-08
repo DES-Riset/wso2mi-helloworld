@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api xmlns="http://ws.apache.org/ns/synapse" name="HelloWorldAPI" context="/hello">
+    <resource methods="GET">
+        <inSequence>
+            <!-- 1. Log incoming request -->
+            <log level="custom">
+                <property name="MESSAGE" value="--- Menerima Request GET /hello di WSO2 MI ---"/>
+            </log>
+
+            <!-- 2. Formulate JSON Response Payload -->
+            <payloadFactory media-type="json">
+                <format>
+                    {
+                        "status": "success",
+                        "message": "Hello World dari WSO2 Micro Integrator Developer Repo!",
+                        "timestamp": "${ctx:SYSTEM_TIME}",
+                        "developer": "Telco OMS Integration Team",
+                        "environment": "Production-Grade Docker"
+                    }
+                </format>
+                <args/>
+            </payloadFactory>
+
+            <!-- 3. Return response back to Client -->
+            <respond/>
+        </inSequence>
+        <outSequence/>
+        <faultSequence>
+            <payloadFactory media-type="json">
+                <format>
+                    {
+                        "status": "error",
+                        "message": "Terjadi kesalahan internal pada integrasi HelloWorld."
+                    }
+                </format>
+                <args/>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+</api>

@@ -1,0 +1,91 @@
+name: Build & Deploy Hello World Composite Application
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Integration App
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11 (WSO2 MI standard)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build WSO2 Composite Application with Maven
+        run: |
+          echo "🔨 Memulai kompilasi proyek integrasi WSO2 MI..."
+          mvn clean install -Dmaven.test.skip=true -B -q
+          echo "✅ Build selesai. File .car siap di-deploy."
+
+      - name: Verify CAR file exists
+        run: |
+          CAR_FILE="HelloWorldCompositeExporter/target/HelloWorldCompositeExporter_1.0.0.car"
+          if [ ! -f "$CAR_FILE" ]; then
+            echo "❌ Error: File .car tidak ditemukan di $CAR_FILE"
+            exit 1
+          fi
+          echo "✅ File .car ditemukan: $CAR_FILE ($(du -h $CAR_FILE | cut -f1))"
+
+  deploy:
+    name: Deploy to WSO2 Server (Hot Deployment)
+    runs-on: [self-hosted, Linux, X64]
+    needs: build
+    # Hanya deploy ke server jika push ke main/master (bukan PR)
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build CAR file
+        run: mvn clean install -Dmaven.test.skip=true -B -q
+
+      - name: Deploy CAR File to Carbonapps (Hot Deployment — No Restart Needed)
+        run: |
+          echo "🚀 Mendeply file .car ke direktori carbonapps server..."
+
+          TARGET_DIR="/opt/docker/wso2/carbonapps"
+          CAR_FILE="HelloWorldCompositeExporter/target/HelloWorldCompositeExporter_1.0.0.car"
+
+          # Pastikan direktori carbonapps ada
+          mkdir -p "$TARGET_DIR"
+
+          # Salin file .car ke carbonapps (WSO2 MI auto-detect tanpa restart)
+          cp "$CAR_FILE" "$TARGET_DIR/"
+
+          echo "🎉 Deploy berhasil! WSO2 MI akan me-load API baru secara otomatis dalam hitungan detik."
+          echo "   → Endpoint aktif: http://localhost:8290/hello"
+
+      - name: Verify deployment
+        run: |
+          echo "⏳ Menunggu 10 detik agar WSO2 MI selesai load API..."
+          sleep 10
+          RESPONSE=$(curl -sf http://localhost:8290/hello || echo "FAILED")
+          if echo "$RESPONSE" | grep -q "success"; then
+            echo "✅ API /hello merespon dengan benar!"
+          else
+            echo "⚠️  Peringatan: API /hello belum merespon. Cek log MI untuk detail."
+            echo "   Response: $RESPONSE"
+          fi
