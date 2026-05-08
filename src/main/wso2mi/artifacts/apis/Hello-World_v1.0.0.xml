@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/hello-world" name="Hello-World" version="1.0.0" version-type="url"
+    xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/">
+        <inSequence>
+            <respond description="Hello" />
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+</api>

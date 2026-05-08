@@ -1,0 +1,10 @@
+---
+key: "Hello-World-1.0.0"
+name : "Hello-World"
+displayName : "Hello-World"
+description: "Hello-World"
+version: "1.0.0"
+serviceUrl: "https://{MI_HOST}:{MI_PORT}/hello-world/1.0.0"
+definitionType: "OAS3"
+securityType: "BASIC"
+mutualSSLEnabled: false

@@ -1,0 +1,42 @@
+name: Deploy WSO2 MI Application
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy Custom WSO2 MI
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout Application Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build Carbon Application & Custom Docker Image
+        run: |
+          echo "📦 Building CAPP and custom WSO2 MI Docker image..."
+          mvn clean package -Pdocker -Dmaven.test.skip=true
+
+      - name: Reload Micro Integrator Service
+        run: |
+          echo "🚀 Restarting WSO2 Micro Integrator container..."
+          # Menyiapkan berkas .env jika belum ada pada runner host
+          if [ ! -f .env ]; then cp .env.example .env; fi
+          
+          # Menjalankan kontainer menggunakan docker-compose lokal bawaan repositori
+          docker compose up -d --force-recreate micro-integrator
+          
+          echo "✅ Deployment selesai! Memeriksa status..."
+          docker compose ps micro-integrator

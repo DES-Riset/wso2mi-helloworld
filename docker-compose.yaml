@@ -1,0 +1,18 @@
+# Standalone Docker Compose for BelajarWso2 Application
+services:
+  micro-integrator:
+    image: ${MI_IMAGE:-belajarwso2:1.0.0}
+    container_name: belajar-micro-integrator
+    restart: unless-stopped
+    ports:
+      - "${MI_PORT:-8290}:8290"
+      - "8253:8253"
+    environment:
+      - TZ=Asia/Jakarta
+      - JVM_MEM_OPTS=${MI_JAVA_OPTS:--Xms512m -Xmx1024m}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -ks https://localhost:9164/healthz || curl -fs http://localhost:8290 > /dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 60s
