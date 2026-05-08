@@ -26,6 +26,9 @@ jobs:
 
       - name: Build Carbon Application & Custom Docker Image
         run: |
+          echo "📁 Creating required deployment directories..."
+          mkdir -p deployment/libs
+          
           echo "📦 Building CAPP and custom WSO2 MI Docker image using Maven Wrapper..."
           chmod +x mvnw
           ./mvnw clean package -Pdocker -Dmaven.test.skip=true
